@@ -1,28 +1,13 @@
-const express = require('express');
+import express from 'express';
+import { initializeDB } from './src/config/firebase.js';
+import inventoryRoutes from './src/inventory/routes.js';
+import shipmentRoutes from './src/inventory/routes.js';
 const app = express();
 
-app.get('/inventory', (res, req) => {
-    console.log("GET")
-    req.send('GET')
-})
+inventoryRoutes(app);
+shipmentRoutes(app);
 
-app.post('/inventory', (res, req) => {
-    console.log("POST")
-})
-
-app.put('/inventory/{iID}', (res, req) => {
-    console.log("PUT")
-})
-
-app.delete('/inventory/{iID}', (res, req) => {
-    console.log("DELETE")
-})
-
-
-app.post('/shipment', (res, req) => {
-    
-})
-
-app.listen(3000, function() {
-    console.log('listening on 3000')
-})
+app.listen(3000, function () {
+  console.log('listening on 3000');
+  initializeDB();
+});
