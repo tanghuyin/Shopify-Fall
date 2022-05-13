@@ -1,0 +1,181 @@
+<!-- inventory.ejs -->
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Inventory</title>
+        <style>
+            tr {
+                border: 1px solid black;
+            }
+
+            td {
+                outline: 1px solid black;
+                padding: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Inventory of a logistic Company</h1>
+        <h4>Create Inventory</h4>
+        <form action="/inventory" method="POST">
+            <input type="text" required="required" placeholder="name" name="name" />
+            <input type="text" required="required" placeholder="location" name="location" />
+            <input type="number" required="required" placeholder="stock" name="stock" />
+            <button type="submit">Create</button>
+        </form>
+
+
+        <div class="wrapper">
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Location</th>
+                    <th>Stock</th>
+                </tr>
+            <% for (var i = 0; i < inventories.length; i++) {
+                %>
+                <tr class="inventories">
+                    <td>
+                        <span><%= inventories[i].name %></span>
+                    </td>
+                    <td>
+                        <span><%= inventories[i].location %></span>
+                    </td>
+                    <td>
+                        <span><%= inventories[i].stock %></span>
+                    </td>
+                    <td>
+                        <button value="<%= JSON.stringify(inventories[i]) %>" onclick="editInventory(this.value)">Edit this</button>
+                    </td>
+                    <td>
+                        <button value="<%= inventories[i].id %>" onclick="deleteInventory(this.value)">Delete</button>
+                    </td>
+                    <td>
+                        <button value="<%= JSON.stringify(inventories[i]) %>" onclick="shipInventory(this.value)">Ship this</button>
+                    </td>
+                </tr>
+                <%
+            }
+            %>
+            </table>
+        </div>
+        <h4>Edit Inventory</h4>
+        <input type="hidden" required="required" id="updateid" />
+        <input type="text" required="required" placeholder="name" name="name" id="updatename" />
+        <input type="text" required="required" placeholder="location" name="location" id="updatelocation" />
+        <input type="number" required="required" placeholder="stock" name="stock" id="updatestock" />
+        <button onclick="updateInventory()">Update</button>
+        <h4>Ship Inventory</h4>
+        <input type="hidden" required="required" id="shipid" />
+        <input type="text" required="required" placeholder="name" name="name" id="shipname" readonly disabled/>
+        <input type="text" required="required" placeholder="location" name="location" id="shiplocation" readonly disabled/>
+        <input type="number" required="required" placeholder="num" name="num" id="shipstock" />
+        <button onclick="startShipInventory()">Ship</button>
+        <script>
+            function deleteInventory(id) {
+                fetch("/inventory/" + id, { method: "DELETE" })
+                .then((res) => {
+                    window.location.reload()
+                })
+            }
+
+            function editInventory(inventory) {
+                var parsed = JSON.parse(inventory)
+                var id = parsed.id;
+                var name = parsed.name;
+                var location = parsed.location;
+                var stock = parsed.stock;
+                var n = document.getElementById("updatename");
+                var l = document.getElementById("updatelocation");
+                var s = document.getElementById("updatestock");
+                var i = document.getElementById("updateid");
+                n.value = name;
+                l.value = location;
+                s.value = stock;
+                i.value = id;
+            }
+
+            function updateInventory() {
+                var n = document.getElementById("updatename");
+                var l = document.getElementById("updatelocation");
+                var s = document.getElementById("updatestock");
+                var id = document.getElementById("updateid").value;
+                if (n.value === '' || l.value === '' || s.value === '') {
+                    alert("Input box cannot be empty")
+                    return
+                }
+            
+                var formData = {
+                    name: n.value,
+                    location: l.value,
+                    stock: s.value
+                }
+
+                fetch("/inventory/" + id, { 
+                    method: "PUT", 
+                    headers: {'Content-type': 'application/json; charset=UTF-8'},
+                    body: JSON.stringify(formData) })
+                    .then(async (res) => {
+                    const data = await res.json()
+                    if (!res.ok) {
+                        alert(data.error)
+                    } else {
+                        alert(data.message)
+                    }
+                    window.location.reload()
+                }).catch((e) => {
+                    console.log(e)
+                    alert(e)
+                })
+            }
+
+            function shipInventory(inventory) {
+                var parsed = JSON.parse(inventory)
+                var id = parsed.id;
+                var name = parsed.name;
+                var location = parsed.location;
+                var n = document.getElementById("shipname");
+                var l = document.getElementById("shiplocation");
+                var i = document.getElementById("shipid");
+                n.value = name;
+                l.value = location;
+                i.value = id;
+            }
+
+            function startShipInventory() {
+                var n = document.getElementById("shipname");
+                var l = document.getElementById("shiplocation");
+                var s = document.getElementById("shipstock");
+                var id = document.getElementById("shipid").value;
+                if (n.value === '' || l.value === '' || s.value === '') {
+                    alert("Input box cannot be empty")
+                    return
+                }
+                var formData = {
+                    name: n.value,
+                    location: l.value,
+                    stock: s.value
+                }
+
+                fetch("/shipment/" + id, { 
+                    method: "POST", 
+                    headers: {'Content-type': 'application/json; charset=UTF-8'},
+                    body: JSON.stringify(formData) })
+                .then(async (res) => {
+                    const data = await res.json()
+                    if (!res.ok) {
+                        alert(data.error)
+                    } else {
+                        alert(data.message)
+                    }
+                    window.location.reload()
+                }).catch((e) => {
+                    console.log(e)
+                    alert(e)
+                })
+            }
+        </script>
+    </body>
+</html>

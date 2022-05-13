@@ -9,6 +9,8 @@ import {
   query,
   startAfter,
   limit,
+  deleteDoc,
+  runTransaction,
 } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -36,4 +38,6 @@ export {
   startAfter,
   limit,
   initializeDB,
+  deleteDoc,
+  runTransaction,
 };
